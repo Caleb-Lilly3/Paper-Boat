@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Box Canoe Buoyancy Calculator</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, #17344c, #08111a 55%); color: #edf6fb; }
+    .wrap { max-width: 1050px; margin: auto; padding: 40px 20px 60px; }
+    .hero { margin-bottom: 24px; }
+    h1 { font-size: clamp(2rem, 4vw, 3.5rem); margin: 0 0 10px; }
+    .sub { color: #b9cfda; max-width: 760px; line-height: 1.6; }
+    .grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 20px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: rgba(12, 25, 36, .9); border: 1px solid rgba(170,210,225,.18); border-radius: 22px; padding: 22px; box-shadow: 0 18px 50px rgba(0,0,0,.25); }
+    .control { margin: 22px 0 28px; }
+    .row { display: flex; align-items: baseline; justify-content: space-between; gap: 15px; }
+    label { font-weight: 700; }
+    .value { font-variant-numeric: tabular-nums; font-size: 1.05rem; color: #9fe5ff; }
+    input[type=range] { width: 100%; accent-color: #63c9f2; }
+    .minmax { display:flex; justify-content:space-between; color:#7895a3; font-size:.82rem; }
+    .results { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    @media (max-width: 560px) { .results { grid-template-columns: 1fr; } }
+    .metric { padding: 18px; border-radius: 16px; background: #101f2c; border: 1px solid #20394a; }
+    .metric .num { font-size: clamp(1.8rem, 5vw, 2.7rem); font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 4px; }
+    .metric .unit { color:#a9c2cc; font-size:.9rem; }
+    .formula { margin-top:18px; padding:16px; border-radius:14px; background:#091720; color:#b8d4de; line-height:1.6; }
+    .boatbox { position:relative; min-height: 410px; overflow:hidden; border-radius:18px; background: linear-gradient(#a8e4ff 0 51%, #227da8 51% 100%); }
+    .waterline { position:absolute; left:0; right:0; top:51%; border-top: 3px solid rgba(255,255,255,.7); }
+    .waterlabel { position:absolute; right:12px; top:calc(51% - 30px); font-size:.8rem; background:rgba(0,0,0,.38); padding:5px 8px; border-radius:7px; }
+    .canoe { position:absolute; left:10%; right:10%; bottom:11%; height: 47%; border: 7px solid #d79a4d; background: rgba(216,158,84,.86); border-radius: 10px 10px 45% 45% / 8% 8% 15% 15%; box-shadow: inset 0 -18px 0 rgba(75,43,20,.15); transform: perspective(400px) rotateX(12deg); }
+    .inside { position:absolute; inset: 16px 22px 26px; border: 3px solid rgba(78,45,20,.55); border-radius:8px 8px 40% 40% / 5% 5% 10% 10%; background: rgba(248,202,130,.38); }
+    .dimension { position:absolute; font-size:.74rem; font-weight:700; color:#fff; background:rgba(0,0,0,.4); padding:5px 7px; border-radius:7px; }
+    .dim-l { left:50%; bottom:4%; transform:translateX(-50%); }
+    .dim-w { right:3%; top:55%; }
+    .dim-d { left:4%; top:70%; }
+    .note { margin-top: 15px; font-size:.84rem; color:#8da8b4; line-height:1.5; }
+    .footer { margin-top: 22px; font-size: .84rem; color:#7895a3; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Box Canoe Buoyancy Calculator</h1>
+      <p class="sub">Drag the physical dimensions of a rectangular, box-shaped canoe. The calculator uses freshwater at <strong>62.4 lb/ft³</strong>, converted to approximately <strong>0.03611 lb/in³</strong>.</p>
+    </section>
+    <section class="grid">
+      <div class="card">
+        <div class="control"><div class="row"><label for="length">Length</label><span id="lengthVal" class="value"></span></div><input id="length" type="range" min="24" max="240" value="120" step="1"><div class="minmax"><span>24 in</span><span>240 in</span></div></div>
+        <div class="control"><div class="row"><label for="width">Width</label><span id="widthVal" class="value"></span></div><input id="width" type="range" min="12" max="96" value="36" step="1"><div class="minmax"><span>12 in</span><span>96 in</span></div></div>
+        <div class="control"><div class="row"><label for="depth">Depth</label><span id="depthVal" class="value"></span></div><input id="depth" type="range" min="6" max="48" value="18" step="1"><div class="minmax"><span>6 in</span><span>48 in</span></div></div>
+        <div class="results">
+          <div class="metric"><div>Internal volume</div><div id="volume" class="num">—</div><div class="unit">cubic inches</div></div>
+          <div class="metric"><div>Maximum displacement</div><div id="capacity" class="num">—</div><div class="unit">pounds at full submergence</div></div>
+        </div>
+        <div class="formula"><strong>Physics</strong><br>Volume = Length × Width × Depth<br>Capacity = Volume × 0.03611 lb/in³</div>
+        <div class="note">This is theoretical maximum buoyant displacement when the full rectangular volume is submerged. It is not a recommended safe payload rating; hull weight, freeboard, stability, structure, and a safety margin must be considered separately.</div>
+      </div>
+      <div class="card">
+        <div class="boatbox" aria-label="Interactive visualization of the box canoe dimensions">
+          <div class="waterline"></div><div class="waterlabel">Freshwater</div>
+          <div class="canoe"><div class="inside"></div></div>
+          <div id="dimL" class="dimension dim-l"></div>
+          <div id="dimW" class="dimension dim-w"></div>
+          <div id="dimD" class="dimension dim-d"></div>
+        </div>
+        <div class="footer">All calculations update instantly as you move the sliders.</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const density = 62.4 / 1728; // lb/in³ ≈ 0.036111111...
+    const els = {
+      length: document.getElementById('length'), width: document.getElementById('width'), depth: document.getElementById('depth'),
+      lengthVal: document.getElementById('lengthVal'), widthVal: document.getElementById('widthVal'), depthVal: document.getElementById('depthVal'),
+      volume: document.getElementById('volume'), capacity: document.getElementById('capacity'),
+      dimL: document.getElementById('dimL'), dimW: document.getElementById('dimW'), dimD: document.getElementById('dimD')
+    };
+    function update() {
+      const L = +els.length.value, W = +els.width.value, D = +els.depth.value;
+      const V = L * W * D, C = V * density;
+      els.lengthVal.textContent = `${L} in`; els.widthVal.textContent = `${W} in`; els.depthVal.textContent = `${D} in`;
+      els.volume.textContent = V.toLocaleString(); els.capacity.textContent = C.toLocaleString(undefined, { maximumFractionDigits: 1 });
+      els.dimL.textContent = `${L} in`; els.dimW.textContent = `${W} in`; els.dimD.textContent = `${D} in`;
+    }
+    ['length','width','depth'].forEach(id => els[id].addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>
